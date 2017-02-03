@@ -1,0 +1,33 @@
+{
+  "name": "crypto-password-helper",
+  "version": "0.0.1",
+  "description": "Helper for encrypting and generating password using crypto in node.js",
+  "author": "Tommy Dronkers <dronkers86@gmail.com>",
+  "contributors": [{
+    "name": "Tommy Dronkers",
+    "email": "dronkers86@gmail.com"
+  }],
+  "scripts": {
+    "test": "mocha ./test"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Steeljuice/crypto-password-helper"
+  },
+  "bugs": {
+    "url": "https://github.com/Steeljuice/crypto-password-helper/issues"
+  },
+  "keywords": [
+    "crypto password",
+    "password encryption",
+    "crypto password helper"
+  ],
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  },
+  "preferGlobal": false,
+  "private": false,
+  "license": "MIT"
+}
