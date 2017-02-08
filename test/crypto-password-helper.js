@@ -12,94 +12,122 @@ let expect = chai.expect;
  **/
 describe('Crypto Password Helper.', () => {
 
-    let config = {
+    let options = {
         iterations: 10,
         hashSize: 32,
         saltSize: 16
-    }
+    };
 
-    /**
-     * Make sure that a hash is returned with correct length and only alphanumerics (hex).
-     **/
-    it('Should generate a hash.', done => {
-        password.encrypt("password", config).then(hash => {
-            expect(hash).to.match(/^[0-9a-z]+$/i);
-            done();
-        }).catch(err => {
-            done(err);
-        });
-    });
 
-    /**
-     * Compare a hashed password successfully.
-     **/
-    it('Should successfully compare password.', done => {
-        password.encrypt("password", config).then(hash => {
-            password.compare("password", hash).then(isMatch => {
-                assert.isTrue(isMatch);
+    describe('Async', () => {
+        /**
+         * Make sure that a hash is returned with correct length and only alphanumerics (hex).
+         **/
+        it('Should generate a hash.', done => {
+            password.encrypt("password", options).then(hash => {
+                expect(hash).to.match(/^[0-9a-z]+$/i);
                 done();
+            }).catch(err => {
+                done(err);
             });
-        }).catch(err => {
-            done(err);
-        });
-    });
-
-    /**
-     * Compare invalid password.
-     **/
-    it('Should not match password.', done => {
-        password.encrypt("password", config).then(hash => {
-            password.compare("invalid", hash).then(isMatch => {
-                assert.isFalse(isMatch);
-                done();
-            });
-        }).catch(err => {
-            done(err);
         });
 
-    });
+        /**
+         * Compare a hashed password successfully.
+         **/
+        it('Should successfully compare password.', done => {
+            password.encrypt("password", options).then(hash => {
+                password.compare("password", hash).then(isMatch => {
+                    assert.isTrue(isMatch);
+                    done();
+                });
+            }).catch(err => {
+                done(err);
+            });
+        }).timeout(5000);
 
-    /**
-     * Minimum iterations 1.
-     **/
-    it('Should not allow iterations below 1.', done => {
-        password.encrypt('password', {
-                iterations: 0
+        /**
+         * Compare invalid password.
+         **/
+        it('Should not match password.', done => {
+            password.encrypt("password", options).then(hash => {
+                password.compare("invalid", hash).then(isMatch => {
+                    assert.isFalse(isMatch);
+                    done();
+                });
+            }).catch(err => {
+                done(err);
+            });
+
+        }).timeout(5000);
+
+        /**
+         * Minimum iterations 1.
+         **/
+        it('Should not allow iterations below 1.', done => {
+            password.encrypt('password', {
+                    iterations: 0
+                }).then(hash => {
+                    done('Iterations below 1 allowed.');
+                })
+                .catch(err => {
+                    assert.isNotNull(err);
+                    done();
+                });
+        });
+
+        /**
+         * Minimum salt size 16 bytes.
+         **/
+        it('Should not allow salt size below 16 bytes.', done => {
+            password.encrypt('password', {
+                saltSize: 15
             }).then(hash => {
-                done('Iterations below 1 allowed.');
-            })
-            .catch(err => {
+                done('Salt Size below 16 allowed.')
+            }).catch(err => {
                 assert.isNotNull(err);
                 done();
             });
-    })
+        });
 
-    /**
-     * Minimum salt size 16 bytes.
-     **/
-    it('Should not allow salt size below 16 bytes.', done => {
-        password.encrypt('password', {
-            saltSize: 15
-        }).then(hash => {
-            done('Salt Size below 16 allowed.')
-        }).catch(err => {
-            assert.isNotNull(err);
+        /**
+         * Minimum hash size 32 bytes.
+         **/
+        it('Should not allow hash size below 32 bytes.', done => {
+            password.encrypt('password', {
+                hashSize: 31
+            }).then(hash => {
+                done('Hash size below 31 allowed.');
+            }).catch(err => {
+                assert.isNotNull(err);
+                done();
+            });
+        });
+    });
+
+    describe('Sync', () => {
+
+
+        it('Should generate hash.', done => {
+            let hash = password.encryptSync('password', options);
+            hash.should.be.a('string');
+            hash.length.should.eql(140);
             done();
         });
-    })
 
-    /**
-     * Minimum hash size 32 bytes.
-     **/
-    it('Should not allow hash size below 32 bytes.', done => {
-        password.encrypt('password', {
-            hashSize: 31
-        }).then(hash => {
-            done('Hash size below 31 allowed.');
-        }).catch(err => {
-            assert.isNotNull(err);
+        it('Should compare hash successfully.', done => {
+            let hash = password.encryptSync('password', options);
+            let comparison = password.compareSync('password', hash);
+            assert.isTrue(comparison);
+            done();
+        }).timeout(5000);
+
+        it('Should not match password.', done => {
+            let hash = password.encryptSync('password', options);
+            assert.isFalse(password.compareSync('invalid', hash));
             done();
         });
-    })
+
+    });
 
 });

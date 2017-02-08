@@ -30,45 +30,55 @@ let defaults = {
 function encrypt(plainPassword, config) {
     return new Promise((resolve, reject) => {
         try {
-            config = _sanitizeConfiguration(config);
-
-            // Salt buffer
-            let salt = crypto.randomBytes(config.saltSize);
-            // Hash buffer
-            let hash = crypto.pbkdf2Sync(plainPassword, salt, config.iterations, config.hashSize, config.digest);
-            // The digest used to hash the password
-            let digest = new Buffer(config.digest);
-
-            // The combined buffer size
-            let combined = Buffer.alloc(4 + 4 + 4 + 4 + salt.length + hash.length + digest.length);
-
-            // Salt size (0-4)
-            combined.writeUInt32BE(salt.length, 0);
-
-            // Iterations size (4-8)
-            combined.writeUInt32BE(config.iterations, 4);
-
-            // Hash size (8-12)
-            combined.writeUInt32BE(config.hashSize, 8);
-
-            // Digest size (12-16)
-            combined.writeUInt32BE(digest.length, 12);
-
-            // Salt (16)
-            salt.copy(combined, 16);
-
-            // Hash (16 + saltSize)
-            hash.copy(combined, 16 + salt.length);
-
-            // Digest (16 + saltSize + hashSize)
-            digest.copy(combined, 16 + salt.length + hash.length);
-
-            return resolve(combined.toString('hex'));
+            return resolve(encryptSync(plainPassword, config));
         }
         catch (err) {
             return reject(err); // Bubble any errors back to the promise.
         }
     });
+}
+
+/**
+ * Synchronous encryption of password.
+ * @param {String} plainPassword - The plain password to encrypt.
+ * @param {JSON} options - (not required) options for encrypting the password.
+ * @returns {String} - hex hashed password.
+ **/
+function encryptSync(plainPassword, config) {
+    config = _sanitizeConfiguration(config);
+
+    // Salt buffer
+    let salt = crypto.randomBytes(config.saltSize);
+    // Hash buffer
+    let hash = crypto.pbkdf2Sync(plainPassword, salt, config.iterations, config.hashSize, config.digest);
+    // The digest used to hash the password
+    let digest = new Buffer(config.digest);
+
+    // The combined buffer size
+    let combined = Buffer.alloc(4 + 4 + 4 + 4 + salt.length + hash.length + digest.length);
+
+    // Salt size (0-4)
+    combined.writeUInt32BE(salt.length, 0);
+
+    // Iterations size (4-8)
+    combined.writeUInt32BE(config.iterations, 4);
+
+    // Hash size (8-12)
+    combined.writeUInt32BE(config.hashSize, 8);
+
+    // Digest size (12-16)
+    combined.writeUInt32BE(digest.length, 12);
+
+    // Salt (16)
+    salt.copy(combined, 16);
+
+    // Hash (16 + saltSize)
+    hash.copy(combined, 16 + salt.length);
+
+    // Digest (16 + saltSize + hashSize)
+    digest.copy(combined, 16 + salt.length + hash.length);
+
+    return combined.toString('hex');
 }
 
 /**
@@ -80,25 +90,35 @@ function encrypt(plainPassword, config) {
 function compare(plainPassword, encryptedPassword) {
     return new Promise((resolve, reject) => {
         try {
-            let hashBuffer = new Buffer(encryptedPassword, 'hex');
-
-            let saltlength = hashBuffer.readUInt32BE(0);
-            let iterations = hashBuffer.readUInt32BE(4);
-            let hashlength = hashBuffer.readUInt32BE(8);
-            let digestlength = hashBuffer.readUInt32BE(12);
-            let salt = hashBuffer.slice(16, 16 + saltlength);
-
-            let hash = hashBuffer.slice(16 + saltlength, 16 + saltlength + hashlength);
-            let digest = hashBuffer.slice(16 + saltlength + hashlength, 16 + saltlength + hashlength + digestlength);
-
-            let plainHash = crypto.pbkdf2Sync(plainPassword, salt, iterations, hashlength, digest.toString());
-
-            return resolve((plainHash.toString('hex') === hash.toString('hex')));
+            return resolve(compareSync(plainPassword, encryptedPassword));
         }
         catch (err) {
             return reject(err);
         }
     });
+}
+
+/**
+ * Compare password and hash sync.
+ * @param {String} plainPassword - the plain password to cmpare
+ * @param {String} hash - the hash to compare with the plainPassword.
+ * @returns True if match, otherwise false.
+ **/
+function compareSync(plainPassword, encryptedPassword) {
+    let hashBuffer = new Buffer(encryptedPassword, 'hex');
+
+    let saltlength = hashBuffer.readUInt32BE(0);
+    let iterations = hashBuffer.readUInt32BE(4);
+    let hashlength = hashBuffer.readUInt32BE(8);
+    let digestlength = hashBuffer.readUInt32BE(12);
+    let salt = hashBuffer.slice(16, 16 + saltlength);
+
+    let hash = hashBuffer.slice(16 + saltlength, 16 + saltlength + hashlength);
+    let digest = hashBuffer.slice(16 + saltlength + hashlength, 16 + saltlength + hashlength + digestlength);
+
+    let plainHash = crypto.pbkdf2Sync(plainPassword, salt, iterations, hashlength, digest.toString());
+
+    return (plainHash.toString('hex') === hash.toString('hex'));
 }
 
 /**
@@ -121,5 +141,7 @@ function _sanitizeConfiguration(options) {
 
 module.exports = {
     encrypt,
-    compare
+    encryptSync,
+    compare,
+    compareSync
 }

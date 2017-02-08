@@ -25,6 +25,11 @@ password.encrypt(plainPassword, config).then(hash => {  // using your own config
     console.log(hash);
 }).catch(err => { throw err; });                        // handle internal server error. (crypto error)
 
+// Generate password-hash synchronous. (with options) - throws on error
+let hash = password.encryptSync(plainPassword, options);           
+
+// Generate password-hash synchronous. (without options) - throws on error
+let hash = password.encryptSync(plainPassword);
 
 // Check if password match
 password.compare(plainPassword, hashedPassword).then(isMatch => {
@@ -34,6 +39,9 @@ password.compare(plainPassword, hashedPassword).then(isMatch => {
         unauthorized();
     }
 }).catch(err => { throw err; });                        // Handle internal server error. (crypto error)
+
+// Compare synchronous. (Throws on error)
+let isMatch = password.compareSync(plainPassword, hashedPassword);
 
 ```
 
