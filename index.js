@@ -21,10 +21,10 @@ let defaults = {
 
 /**
  * Encrypts a password using a promise. The hash will contain the salt
- * so there is no need to save it seperatly.
+ * so there is no need to save it separately.
  * 
  * @param {String} plainPassword - The plain password to encrypt.
- * @param {JSON} options - (not required) options for encrypting the password.
+ * @param {Object} config - (not required) options for encrypting the password.
  * @returns {Promise} - Promise parameter is the encrypted password as String.
  **/
 function encrypt(plainPassword, config) {
@@ -41,7 +41,7 @@ function encrypt(plainPassword, config) {
 /**
  * Synchronous encryption of password.
  * @param {String} plainPassword - The plain password to encrypt.
- * @param {JSON} options - (not required) options for encrypting the password.
+ * @param {Object} config - (not required) options for encrypting the password.
  * @returns {String} - hex hashed password.
  **/
 function encryptSync(plainPassword, config) {
@@ -83,9 +83,9 @@ function encryptSync(plainPassword, config) {
 
 /**
  * Compare a plain password with an encrypted password.
- * @param {String} plainPassowrd - The plain password to compare.
+ * @param {String} plainPassword - The plain password to compare.
  * @param {String} encryptedPassword - The encrypted password to compare with plain password.
- * @returns {Promise} - Promise parameter is a boolen, true when plainPassword matches encryptedPassword. Otherwise false.
+ * @returns {Promise} - Promise parameter is a boolean, true when plainPassword matches encryptedPassword. Otherwise false.
  **/
 function compare(plainPassword, encryptedPassword) {
     return new Promise((resolve, reject) => {
@@ -100,8 +100,8 @@ function compare(plainPassword, encryptedPassword) {
 
 /**
  * Compare password and hash sync.
- * @param {String} plainPassword - the plain password to cmpare
- * @param {String} hash - the hash to compare with the plainPassword.
+ * @param {String} plainPassword - the plain password to compare
+ * @param {String} encryptedPassword - the hash to compare with the plainPassword.
  * @returns True if match, otherwise false.
  **/
 function compareSync(plainPassword, encryptedPassword) {
@@ -122,10 +122,10 @@ function compareSync(plainPassword, encryptedPassword) {
 }
 
 /**
- * Helper function to sanitzie the options. Makes sure that the settings
+ * Helper function to sanitize the options. Makes sure that the settings
  * are OK.
- * @param {JSON} options - the JSON options to sanitize.
- * @returns {JSON} - With sanitized values.
+ * @param {Object} options - the JSON options to sanitize.
+ * @returns {Object} - With sanitized values.
  * @throws {Error} - If options are not correct.
  **/
 function _sanitizeConfiguration(options) {
