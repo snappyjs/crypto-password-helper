@@ -52,7 +52,7 @@ function encryptSync(plainPassword, config) {
     // Hash buffer
     let hash = crypto.pbkdf2Sync(plainPassword, salt, config.iterations, config.hashSize, config.digest);
     // The digest used to hash the password
-    let digest = new Buffer(config.digest);
+    let digest = Buffer.from(config.digest);
 
     // The combined buffer size
     let combined = Buffer.alloc(4 + 4 + 4 + 4 + salt.length + hash.length + digest.length);
@@ -105,7 +105,7 @@ function compare(plainPassword, encryptedPassword) {
  * @returns True if match, otherwise false.
  **/
 function compareSync(plainPassword, encryptedPassword) {
-    let hashBuffer = new Buffer(encryptedPassword, 'hex');
+    let hashBuffer = Buffer.from(encryptedPassword, 'hex');
 
     let saltlength = hashBuffer.readUInt32BE(0);
     let iterations = hashBuffer.readUInt32BE(4);
